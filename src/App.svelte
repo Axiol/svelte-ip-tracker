@@ -5,9 +5,31 @@
 
 <script>
 	import L from 'leaflet';
+	import { onMount } from 'svelte';
 
 	let map;
 	let formIP = '';
+	let ip = '';
+	let location = '';
+	let timezone = '';
+	let isp = '';
+
+	onMount(async () => {
+    await fetch('https://api.ipify.org?format=json')
+      .then(r => r.json())
+      .then(async (data) => {
+				ip = data.ip;
+				
+				await fetch('https://geo.ipify.org/api/v1?apiKey=' + __myapp.env.API_KEY + '&ipAddress=' + ip)
+					.then(r2 => r2.json())
+					.then(data2 => {
+						console.log(data2);
+						location = data2.location.city + ', ' + data2.location.region + ' ' + data2.location.postalCode;
+						timezone = data2.location.timezone;
+						isp = data2.isp;
+					});
+      });
+  });
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -28,7 +50,6 @@
 	};
 
 	const useMap = (container) => {
-		console.log(container);
 		map = createMap(container);
 
 		return {
@@ -59,19 +80,43 @@
 		<div class="information">
 			<div class="information__section">
 				<p class="information__title">IP Address</p>
-				<p class="information__content">192.212.174.101</p>
+				<p class="information__content">
+					{#if ip !== ''}
+						{ip}
+					{:else}
+						...
+					{/if}
+				</p>
 			</div>
 			<div class="information__section">
 				<p class="information__title">Location</p>
-				<p class="information__content">Brooklyn, NY 10001</p>
+				<p class="information__content">
+					{#if location !== ''}
+						{location}
+					{:else}
+						...
+					{/if}
+				</p>
 			</div>
 			<div class="information__section">
 				<p class="information__title">Timezone</p>
-				<p class="information__content">UTC -05:00</p>
+				<p class="information__content">
+					{#if timezone !== ''}
+						UTC {timezone}
+					{:else}
+						...
+					{/if}
+				</p>
 			</div>
 			<div class="information__section">
 				<p class="information__title">ISP</p>
-				<p class="information__content">SpaceX Starlink</p>
+				<p class="information__content">
+					{#if isp !== ''}
+						{isp}
+					{:else}
+						...
+					{/if}
+				</p>
 			</div>
 		</div>
 	</header>
