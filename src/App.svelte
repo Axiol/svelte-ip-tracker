@@ -8,11 +8,18 @@
 	import { onMount } from 'svelte';
 
 	let map;
+	let marker;
 	let formIP = '';
 	let ip = '';
 	let location = '';
 	let timezone = '';
 	let isp = '';
+	const customMarker = L.icon({
+		iconUrl: '/assets/img/icon-location.svg',
+		shadowUrl: '',
+		iconSize: [46, 56],
+		iconAnchor: [23, 56]
+	});
 
 	onMount(async () => {
     await fetch('https://api.ipify.org?format=json')
@@ -20,16 +27,23 @@
       .then(async (data) => {
 				ip = data.ip;
 				
-				await fetch('https://geo.ipify.org/api/v1?apiKey=' + __myapp.env.API_KEY + '&ipAddress=' + ip)
-					.then(r2 => r2.json())
-					.then(data2 => {
-						console.log(data2);
-						location = data2.location.city + ', ' + data2.location.region + ' ' + data2.location.postalCode;
-						timezone = data2.location.timezone;
-						isp = data2.isp;
-					});
+				getIPInfo(ip);
       });
-  });
+	});
+	
+	const getIPInfo = async (ip) => {
+		await fetch('https://geo.ipify.org/api/v1?apiKey=' + __myapp.env.API_KEY + '&ipAddress=' + ip)
+			.then(r2 => r2.json())
+			.then(data2 => {
+				console.log(data2);
+				location = data2.location.city + ', ' + data2.location.region + ' ' + data2.location.postalCode;
+				timezone = data2.location.timezone;
+				isp = data2.isp;
+
+				map.setView([data2.location.lat + 0.001, data2.location.lng], 16);
+				marker = L.marker([data2.location.lat, data2.location.lng], {icon: customMarker}).addTo(map);
+			});
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
