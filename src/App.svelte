@@ -93,7 +93,7 @@
 
 	.header {
 		height: 280px;
-		padding: 8px 20px 0 20px;
+		padding: 8px 24px 0 24px;
 		background-image: url(../assets/img/pattern-bg.png);
 		background-position: center;
 		background-size: cover;
@@ -116,7 +116,7 @@
 		border: none;
 		border-radius: 15px;
 		background-color: white;
-		padding: 19px 78px 20px 22px;
+		padding: 20px 78px 18px 22px;
 		font-size: 18px;
 		letter-spacing: 0.1px;
 		word-spacing: 0.2px;
@@ -175,7 +175,45 @@
 	}
 
 	.map {
-		/* display: none; */
 		height: calc(100vh - 280px);
+	}
+
+	@media (max-width: 850px) {
+		.header {
+			height: 300px;
+		}
+
+		.title {
+			font-size: 1.6rem;
+		}
+
+		.form {
+			margin-bottom: 25px;
+		}
+
+		.information {
+			flex-direction: column;
+			padding: 25px 0 0 0;
+		}
+
+		.information__section {
+			border: none;
+			text-align: center;
+			margin-bottom: 23px;
+		}
+
+		.information__title {
+			margin: 0;
+			font-size: 12px;
+		}
+
+		.information__content {
+			font-size: 20px;
+			margin-top: 7px;
+		}
+
+		.map {
+			height: calc(100vh - 300px);
+		}
 	}
 </style>
