@@ -35,19 +35,18 @@
 		await fetch('https://geo.ipify.org/api/v1?apiKey=' + __myapp.env.API_KEY + '&ipAddress=' + ip)
 			.then(r2 => r2.json())
 			.then(data2 => {
-				console.log(data2);
 				location = data2.location.city + ', ' + data2.location.region + ' ' + data2.location.postalCode;
 				timezone = data2.location.timezone;
 				isp = data2.isp;
 
-				map.setView([data2.location.lat + 0.001, data2.location.lng], 16);
-				marker = L.marker([data2.location.lat, data2.location.lng], {icon: customMarker}).addTo(map);
+				map.setView([data2.location.lat + 0.001, data2.location.lng - 0.0002], 16);
+				marker.setLatLng([data2.location.lat, data2.location.lng]);
 			});
 	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('foo');
+		getIPInfo(formIP);
 	};
 
 	const createMap = (container) => {
@@ -63,12 +62,20 @@
 		return m;
 	};
 
+	const createMarker = () => {
+  let m = L.marker([0, 0], {icon: customMarker}).addTo(map);
+
+		return m;
+	};
+
 	const useMap = (container) => {
 		map = createMap(container);
+		marker = createMarker();
 
 		return {
 			destroy: () => {
 				map.remove();
+				marker.remove();
 			}
 		};
 	};
@@ -85,7 +92,7 @@
 		<h1 class="title">IP Address Tracker</h1>
 
 		<form class="form" on:submit={handleSubmit}>
-			<input class="form__input" value={formIP} type="text" placeholder="Search for any IP address or domain">
+			<input class="form__input" bind:value={formIP} type="text" placeholder="Search for any IP address or domain">
 			<button class="form__button" type="submit">
 				<img src="./assets/img/icon-arrow.svg" alt="">
 			</button>
@@ -205,6 +212,7 @@
 		max-width: 1110px;
 		margin: 0 auto;
 		padding: 44px 0 40px 0;
+		transition: all .2s ease;
 	}
 
 	.information__section {
