@@ -7,6 +7,7 @@
 	import L from 'leaflet';
 	import { onMount } from 'svelte';
 
+	const regex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/gm;
 	let map;
 	let marker;
 	let formIP = '';
@@ -30,23 +31,41 @@
 				getIPInfo(ip);
       });
 	});
+
+	const updateMapPosition = (lat, lng) => {
+		map.setView([lat + 0.001, lng], 16);
+		marker.setLatLng([lat, lng]);
+	}
 	
 	const getIPInfo = async (ip) => {
 		await fetch('https://geo.ipify.org/api/v1?apiKey=' + __myapp.env.API_KEY + '&ipAddress=' + ip)
-			.then(r2 => r2.json())
-			.then(data2 => {
-				location = data2.location.city + ', ' + data2.location.region + ' ' + data2.location.postalCode;
-				timezone = data2.location.timezone;
-				isp = data2.isp;
+			.then(r => r.json())
+			.then(data => {
+				location = data.location.city + ', ' + data.location.region + ' ' + data.location.postalCode;
+				timezone = data.location.timezone;
+				isp = data.isp;
 
-				map.setView([data2.location.lat + 0.001, data2.location.lng - 0.0002], 16);
-				marker.setLatLng([data2.location.lat, data2.location.lng]);
+				updateMapPosition(data.location.lat, data.location.lng);
 			});
 	};
 
+	const getDomainIP = async (domain) => {
+		await fetch('https://dns.google/resolve?name=' + domain)
+			.then(r => r.json())
+			.then(data => {
+				getIPInfo(data.Answer[0].data);
+			});
+	}
+
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		getIPInfo(formIP);
+		const r = regex.exec(formIP)
+
+		if(r === null) {
+			getIPInfo(formIP);
+		} else {
+			getDomainIP(formIP);
+		}
 	};
 
 	const createMap = (container) => {
